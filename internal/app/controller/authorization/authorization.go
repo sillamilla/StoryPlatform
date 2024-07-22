@@ -21,13 +21,13 @@ func (a AuthController) SignUp(c *gin.Context) {
 	var input model.Input
 
 	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, err := a.auth.SignUp(c, input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -38,13 +38,13 @@ func (a AuthController) SignIn(c *gin.Context) {
 	var input model.Input
 
 	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, err := a.auth.SignIn(c, input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -54,13 +54,13 @@ func (a AuthController) SignIn(c *gin.Context) {
 func (a AuthController) Logout(c *gin.Context) {
 	session := c.GetHeader("session")
 	if session == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Session field is empty"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Session field is empty"})
 		return
 	}
 
 	err := a.auth.Logout(c, session)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 }

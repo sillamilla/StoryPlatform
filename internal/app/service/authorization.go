@@ -25,26 +25,24 @@ func NewAuthorization(sessions Session, user User) Authorization {
 }
 
 func (a auth) SignUp(ctx context.Context, input model.Input) (model.User, error) {
-	const op = "authorization.SignUp"
-
 	ok, err := a.user.IsUsernameAvailable(ctx, input.Username)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 
 	if ok {
-		return model.User{}, errors.New("This username is taken")
+		return model.User{}, errors.New("this username is taken")
 	}
 
 	password, err := helper.HashPassword(input.Password)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 	input.Password = password
 
 	session, err := helper.GenerateSession()
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 
 	id := uuid.NewString()
@@ -52,34 +50,32 @@ func (a auth) SignUp(ctx context.Context, input model.Input) (model.User, error)
 
 	err = a.user.Create(ctx, newUser)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 
 	err = a.session.CreateOrUpdate(ctx, id, session)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op) //todo to many wrap
+		return model.User{}, err
 	}
 
 	return newUser, nil
 }
 
 func (a auth) SignIn(ctx context.Context, input model.Input) (model.User, error) {
-	const op = "authorization.SignIn"
-
 	user, err := a.user.GetByUsername(ctx, input.Username)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 
 	err = helper.ComparePassword(user.Password, input.Password)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, "Invalid password")
+		return model.User{}, errors.New("invalid password")
 	}
 
 	if user.Session == "" {
 		session, err := helper.GenerateSession()
 		if err != nil {
-			return model.User{}, errors.Wrap(err, op)
+			return model.User{}, err
 		}
 		user.Session = session
 	}
@@ -88,29 +84,25 @@ func (a auth) SignIn(ctx context.Context, input model.Input) (model.User, error)
 
 	err = a.session.CreateOrUpdate(ctx, user.ID, user.Session)
 	if err != nil {
-		return model.User{}, errors.Wrap(err, op)
+		return model.User{}, err
 	}
 
 	return user, nil
 }
 
 func (a auth) GetSessionInfo(ctx context.Context, session string) (model.SessionInfo, error) {
-	const op = "authorization.GetSessionInfo"
-
 	info, err := a.session.GetSessionInfo(ctx, session)
 	if err != nil {
-		return model.SessionInfo{}, errors.Wrap(err, op)
+		return model.SessionInfo{}, err
 	}
 
 	return info, nil
 }
 
 func (a auth) Logout(ctx context.Context, session string) error {
-	const op = "authorization.Logout"
-
 	err := a.session.Logout(ctx, session)
 	if err != nil {
-		return errors.Wrap(err, op)
+		return err
 	}
 
 	return nil

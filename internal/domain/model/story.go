@@ -20,7 +20,7 @@ type Story struct {
 }
 
 type Rate struct {
-	Rating int `json:"rating" building:"required, min=-1, max=1"`
+	Rating int `json:"rating" binding:"required,min=-1,max=1"`
 }
 
 func StoryFromInput(id string, userID string, author string, time time.Time, input StoryInput) Story {

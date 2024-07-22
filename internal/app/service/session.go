@@ -5,7 +5,7 @@ import (
 	"StoryPlatforn_GIN/internal/domain/model"
 	"context"
 	"github.com/pkg/errors"
-	time2 "time"
+	"time"
 )
 
 type Session interface {
@@ -46,9 +46,9 @@ func (s session) GetSessionInfo(ctx context.Context, session string) (model.Sess
 
 func (s session) CreateOrUpdate(ctx context.Context, userID, session string) error {
 	const op = "session.CreateOrUpdate"
-	//todo time2 wtf
-	time := time2.Now()
-	err := s.repo.Upsert(ctx, userID, session, time)
+
+	now := time.Now()
+	err := s.repo.Upsert(ctx, userID, session, now)
 	if err != nil {
 		return errors.Wrap(err, op)
 	}

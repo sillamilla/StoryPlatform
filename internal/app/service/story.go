@@ -5,6 +5,7 @@ import (
 	"StoryPlatforn_GIN/internal/domain/model"
 	"context"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 type Story interface {
 	CreateStory(ctx context.Context, userID string, input model.StoryInput) (model.Story, error)
 	GetStory(ctx context.Context, id string) (model.Story, error)
-	RateStory(ctx context.Context, userID string, rate int, id string) error
+	RateStory(ctx context.Context, userID string, id string, rate int) error
 	UpdateStory(ctx context.Context, userID string, id string, input model.StoryInput) error
 	DeleteStory(ctx context.Context, userID string, id string) error
 }
@@ -31,7 +32,7 @@ func (s *story) CreateStory(ctx context.Context, userID string, input model.Stor
 
 	user, err := s.us.GetByID(ctx, userID)
 	if err != nil {
-		return model.Story{}, errors.Wrap(err, "user not found by id")
+		return model.Story{}, errors.Wrap(err, op)
 	}
 
 	id := uuid.NewString()
@@ -52,29 +53,34 @@ func (s *story) GetStory(ctx context.Context, id string) (model.Story, error) {
 	const op = "story.GetStory"
 	data, err := s.st.Get(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.Story{}, errors.New("no data found with given name")
+		}
 		return model.Story{}, errors.Wrap(err, op)
 	}
 
 	return data, nil
 }
 
-func (s *story) RateStory(ctx context.Context, userID string, rate int, id string) error {
+func (s *story) RateStory(ctx context.Context, userID string, id string, rate int) error {
 	const op = "story.RateStory"
 
 	data, err := s.st.IsRated(ctx, userID, id)
-	if err != nil {
-		return errors.Wrap(err, op)
+	if len(data) > 0 {
+		return errors.New("you can not rate again")
 	}
-	if data == "" {
-		return errors.New("You can not rate again") //todo bad request
-	} else {
-		err = s.st.MarkUserRated(ctx, userID, id)
-		if err != nil {
-			return errors.Wrap(err, op)
-		}
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			err = s.st.MarkUserRated(ctx, userID, id)
+			if err != nil {
+				return errors.Wrap(err, op)
+			}
 
-		err = s.st.Rate(ctx, id, rate)
-		if err != nil {
+			err = s.st.Rate(ctx, id, rate)
+			if err != nil {
+				return errors.Wrap(err, op)
+			}
+		} else {
 			return errors.Wrap(err, op)
 		}
 	}

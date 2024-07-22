@@ -4,7 +4,7 @@ import (
 	"StoryPlatforn_GIN/internal/app/repository"
 	"StoryPlatforn_GIN/internal/domain/model"
 	"context"
-	"database/sql"
+	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -41,8 +41,8 @@ func (u user) GetByUsername(ctx context.Context, username string) (model.User, e
 
 	byUsername, err := u.repo.GetByUsername(ctx, username)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return model.User{}, errors.New("No user with such username") //todo not work
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.User{}, errors.New("no data found with given name")
 		}
 		return model.User{}, errors.Wrap(err, op)
 	}

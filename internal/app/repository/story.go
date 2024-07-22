@@ -53,6 +53,7 @@ func (s story) Get(ctx context.Context, id string) (model.Story, error) {
 
 func (s story) IsRated(ctx context.Context, userID string, id string) (string, error) {
 	var data string
+
 	query := "SELECT story_id FROM story_ratings WHERE user_id = $1 AND story_id = $2"
 	err := s.pgx.QueryRow(ctx, query, userID, id).Scan(&data)
 	if err != nil {
