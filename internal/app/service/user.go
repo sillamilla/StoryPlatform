@@ -42,7 +42,7 @@ func (u user) GetByUsername(ctx context.Context, username string) (model.User, e
 	byUsername, err := u.repo.GetByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.User{}, errors.New("no data found with given name")
+			return model.User{}, model.ErrUserNotFound
 		}
 		return model.User{}, errors.Wrap(err, op)
 	}

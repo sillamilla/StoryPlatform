@@ -4,6 +4,7 @@ import (
 	"StoryPlatforn_GIN/internal/app/service"
 	"StoryPlatforn_GIN/internal/domain/model"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -21,12 +22,16 @@ func (a AuthController) SignUp(c *gin.Context) {
 	var input model.Input
 
 	if err := c.BindJSON(&input); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrValidationInput.Error()})
 		return
 	}
 
 	user, err := a.auth.SignUp(c, input)
 	if err != nil {
+		if errors.Is(err, model.ErrUsernameTaken) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -38,7 +43,7 @@ func (a AuthController) SignIn(c *gin.Context) {
 	var input model.Input
 
 	if err := c.BindJSON(&input); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrValidationInput.Error()})
 		return
 	}
 
@@ -54,7 +59,7 @@ func (a AuthController) SignIn(c *gin.Context) {
 func (a AuthController) Logout(c *gin.Context) {
 	session := c.GetHeader("session")
 	if session == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Session field is empty"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.SessionEmpty.Error()})
 		return
 	}
 

@@ -8,11 +8,11 @@ type Input struct {
 }
 
 type User struct {
-	ID        string
-	Username  string
-	Password  string
-	Session   string
-	CreatedAt time.Time
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Session   string    `json:"session"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 func UserFromInput(ID string, session string, user Input) User {

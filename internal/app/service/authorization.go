@@ -5,7 +5,6 @@ import (
 	"StoryPlatforn_GIN/internal/domain/model"
 	"context"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 )
 
 type Authorization interface {
@@ -31,7 +30,7 @@ func (a auth) SignUp(ctx context.Context, input model.Input) (model.User, error)
 	}
 
 	if ok {
-		return model.User{}, errors.New("this username is taken")
+		return model.User{}, model.ErrUsernameTaken
 	}
 
 	password, err := helper.HashPassword(input.Password)
@@ -69,7 +68,7 @@ func (a auth) SignIn(ctx context.Context, input model.Input) (model.User, error)
 
 	err = helper.ComparePassword(user.Password, input.Password)
 	if err != nil {
-		return model.User{}, errors.New("invalid password")
+		return model.User{}, model.InvalidPassword
 	}
 
 	if user.Session == "" {

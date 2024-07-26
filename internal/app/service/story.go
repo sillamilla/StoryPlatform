@@ -54,7 +54,7 @@ func (s *story) GetStory(ctx context.Context, id string) (model.Story, error) {
 	data, err := s.st.Get(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.Story{}, errors.New("no data found with given name")
+			return model.Story{}, model.ErrNoData
 		}
 		return model.Story{}, errors.Wrap(err, op)
 	}
@@ -67,7 +67,7 @@ func (s *story) RateStory(ctx context.Context, userID string, id string, rate in
 
 	data, err := s.st.IsRated(ctx, userID, id)
 	if len(data) > 0 {
-		return errors.New("you can not rate again")
+		return model.ErrRateAgain
 	}
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

@@ -25,17 +25,10 @@ func (e error) Error() string {
 	return string(e)
 }
 
-const (
-	cantRateAgain error = "you can not rate again"
-	noData        error = "no data found with given name"
-	userIDEmpty   error = "userID is empty"
-	idEmpty       error = "id field is empty"
-)
-
 func (s *StoryController) CreateStory(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": userIDEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
 
@@ -58,14 +51,14 @@ func (s *StoryController) CreateStory(c *gin.Context) {
 func (s *StoryController) GetStory(c *gin.Context) {
 	id := c.Params.ByName("id")
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": idEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.IDEmpty.Error()})
 		return
 	}
 
 	data, err := s.Story.GetStory(c, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": noData.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		} else {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -79,13 +72,13 @@ func (s *StoryController) GetStory(c *gin.Context) {
 func (s *StoryController) UpdateStory(c *gin.Context) {
 	id := c.Params.ByName("id")
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": idEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.IDEmpty.Error()})
 		return
 	}
 
 	userID, ok := c.Get("userID")
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": userIDEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
 
@@ -99,7 +92,7 @@ func (s *StoryController) UpdateStory(c *gin.Context) {
 	err := s.Story.UpdateStory(c, userID.(string), id, input)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": noData.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -110,13 +103,13 @@ func (s *StoryController) UpdateStory(c *gin.Context) {
 func (s *StoryController) RateStory(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": idEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.IDEmpty.Error()})
 		return
 	}
 
 	userID, ok := c.Get("userID")
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": userIDEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
 
@@ -127,14 +120,14 @@ func (s *StoryController) RateStory(c *gin.Context) {
 		return
 	}
 
-	err := s.Story.RateStory(c, userID.(string), input.Rating, id)
+	err := s.Story.RateStory(c, userID.(string), id, input.Rating)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": noData.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
-		if errors.Is(err, cantRateAgain) {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": cantRateAgain.Error()})
+		if errors.Is(err, model.ErrRateAgain) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrRateAgain.Error()})
 			return
 		}
 
@@ -146,20 +139,20 @@ func (s *StoryController) RateStory(c *gin.Context) {
 func (s *StoryController) DeleteStory(c *gin.Context) {
 	id := c.Params.ByName("id")
 	if id == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": idEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.IDEmpty.Error()})
 		return
 	}
 
 	userID, ok := c.Get("userID")
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": userIDEmpty.Error()})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
 
 	err := s.Story.DeleteStory(c, userID.(string), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": noData.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
 

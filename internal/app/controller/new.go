@@ -11,8 +11,8 @@ type Controller struct {
 	Authorization authorization.AuthController
 }
 
-func New(srv *service.Service) Controller {
-	return Controller{
+func New(srv *service.Service) *Controller {
+	return &Controller{
 		Story:         NewStory(srv.Story),
 		User:          NewUser(srv.User),
 		Authorization: authorization.NewAuthController(srv.Authorization),
