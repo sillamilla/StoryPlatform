@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func (s *APITestSuite) TestSignUpHandler() {
+func (s *APITestSuite) TestSignUpController() {
 	gin.SetMode(gin.TestMode)
 
 	testTable := []struct {
@@ -54,7 +54,7 @@ func (s *APITestSuite) TestSignUpHandler() {
 	}
 }
 
-func (s *APITestSuite) TestSignInHandler() {
+func (s *APITestSuite) TestSignInController() {
 	gin.SetMode(gin.TestMode)
 
 	testTable := []struct {
@@ -101,7 +101,7 @@ func (s *APITestSuite) TestSignInHandler() {
 	}
 }
 
-func (s *APITestSuite) TestLogoutHandler() {
+func (s *APITestSuite) TestLogoutController() {
 	gin.SetMode(gin.TestMode)
 
 	testTable := []struct {

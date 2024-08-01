@@ -65,6 +65,14 @@ func (s *story) GetStory(ctx context.Context, id string) (model.Story, error) {
 func (s *story) RateStory(ctx context.Context, userID string, id string, rate int) error {
 	const op = "story.RateStory"
 
+	_, err := s.st.Get(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.ErrNoData
+		}
+		return errors.Wrap(err, op)
+	}
+
 	data, err := s.st.IsRated(ctx, userID, id)
 	if len(data) > 0 {
 		return model.ErrRateAgain
@@ -93,6 +101,9 @@ func (s *story) UpdateStory(ctx context.Context, userID string, id string, input
 
 	err := s.st.Update(ctx, userID, id, input)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.ErrNoData
+		}
 		return errors.Wrap(err, op)
 	}
 
@@ -104,6 +115,9 @@ func (s *story) DeleteStory(ctx context.Context, userID string, id string) error
 
 	err := s.st.Delete(ctx, userID, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.ErrNoData
+		}
 		return errors.Wrap(err, op)
 	}
 

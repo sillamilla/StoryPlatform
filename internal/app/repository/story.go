@@ -3,7 +3,6 @@ package repository
 import (
 	"StoryPlatforn_GIN/internal/domain/model"
 	"context"
-	"database/sql"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -91,7 +90,7 @@ func (s story) Update(ctx context.Context, userID string, id string, input model
 	}
 
 	if result.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil
@@ -105,7 +104,7 @@ func (s story) Delete(ctx context.Context, userID string, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil

@@ -71,9 +71,5 @@ var (
 			UserID:  users[0].ID,
 			StoryID: stories[1].ID,
 		},
-		{
-			UserID:  users[1].ID,
-			StoryID: stories[0].ID,
-		},
 	}
 )

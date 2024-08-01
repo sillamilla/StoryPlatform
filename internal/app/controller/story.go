@@ -3,7 +3,6 @@ package Controllers
 import (
 	"StoryPlatforn_GIN/internal/app/service"
 	"StoryPlatforn_GIN/internal/domain/model"
-	"database/sql"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -19,15 +18,9 @@ func NewStory(srv service.Story) StoryController {
 	}
 }
 
-type error string
-
-func (e error) Error() string {
-	return string(e)
-}
-
 func (s *StoryController) CreateStory(c *gin.Context) {
-	userID, ok := c.Get("userID")
-	if !ok {
+	userID, _ := c.Get("userID")
+	if userID == "" {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
@@ -57,7 +50,7 @@ func (s *StoryController) GetStory(c *gin.Context) {
 
 	data, err := s.Story.GetStory(c, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, model.ErrNoData) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		} else {
@@ -76,8 +69,8 @@ func (s *StoryController) UpdateStory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := c.Get("userID")
-	if !ok {
+	userID, _ := c.Get("userID")
+	if userID == "" {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
@@ -91,7 +84,7 @@ func (s *StoryController) UpdateStory(c *gin.Context) {
 
 	err := s.Story.UpdateStory(c, userID.(string), id, input)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, model.ErrNoData) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
@@ -107,8 +100,8 @@ func (s *StoryController) RateStory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := c.Get("userID")
-	if !ok {
+	userID, _ := c.Get("userID")
+	if userID == "" {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
@@ -122,7 +115,7 @@ func (s *StoryController) RateStory(c *gin.Context) {
 
 	err := s.Story.RateStory(c, userID.(string), id, input.Rating)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, model.ErrNoData) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
@@ -143,15 +136,15 @@ func (s *StoryController) DeleteStory(c *gin.Context) {
 		return
 	}
 
-	userID, ok := c.Get("userID")
-	if !ok {
+	userID, _ := c.Get("userID")
+	if userID == "" {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": model.UserIDEmpty.Error()})
 		return
 	}
 
 	err := s.Story.DeleteStory(c, userID.(string), id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, model.ErrNoData) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": model.ErrNoData.Error()})
 			return
 		}
