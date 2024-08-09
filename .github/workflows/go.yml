@@ -1,4 +1,4 @@
-name: Go
+name: Go CI/CD Pipeline
 
 on:
   push:
@@ -7,8 +7,48 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  setup:
+    name: Set Up Environment
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v4.1.0
+      with:
+        go-version: '1.22.1'
+    - name: Install dependencies
+      run: go mod download
+
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v4.1.0
+      with:
+        go-version: '1.22.1'
+    - name: Build
+      run: go build -v ./...
+
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v4.1.0
+      with:
+        go-version: '1.22.1'
+    - name: Run Unit Tests
+      run: make test.unit
+
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    needs: setup
     services:
       postgres:
         image: postgres:13
@@ -23,28 +63,17 @@ jobs:
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 5
-
     steps:
     - uses: actions/checkout@v4
-
     - name: Set up Go
       uses: actions/setup-go@v4.1.0
       with:
         go-version: '1.22.1'
-
     - name: Install goose
       run: go install github.com/pressly/goose/v3/cmd/goose@latest
-
     - name: Wait for Postgres to be ready
       run: until pg_isready -h localhost -p 5432 -U test1234; do sleep 1; done
-
-    - name: Build
-      run: go build -v ./...
-
-    - name: Unit Tests
-      run: make test.unit  
-
-    - name: Integration Tests
+    - name: Run Integration Tests
       env:
         GIN_MODE: release
       run: make test.integration
