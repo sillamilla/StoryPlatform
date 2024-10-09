@@ -63,4 +63,6 @@ jobs:
       - name: Wait for Postgres to be ready
         run: until pg_isready -h localhost -p 5432 -U "${{ secrets.POSTGRES_USER }}"; do sleep 1; done
       - name: Run Integration Tests
+        env:
+          GIN_MODE: release
         run: make test.integration
