@@ -4,20 +4,17 @@ import (
 	Controllers "StoryPlatforn_GIN/internal/app/controller"
 	"StoryPlatforn_GIN/internal/app/repository"
 	"StoryPlatforn_GIN/internal/app/service"
+	"StoryPlatforn_GIN/internal/config"
 	"StoryPlatforn_GIN/internal/infrastructure/db"
 	"StoryPlatforn_GIN/internal/infrastructure/gin"
 	"context"
 	"log"
-	"os"
 )
 
 func main() {
-	uri := os.Getenv("DATABASE_URI")
-	if uri == "" {
-		log.Fatal("DATABASE_URI is not set")
-	}
+	cfg := config.GetConfig()
 
-	conn, err := db.NewPostgresDB(uri)
+	conn, err := db.NewPostgresDB(cfg.Postgres.URI)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,5 +26,5 @@ func main() {
 
 	router := gin.SetupRouter(*controller)
 
-	router.Run() //8080
+	router.Run(":" + cfg.HTTP.Port)
 }

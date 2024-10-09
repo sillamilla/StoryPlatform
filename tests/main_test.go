@@ -6,6 +6,7 @@ import (
 	"StoryPlatforn_GIN/internal/app/service"
 	"context"
 	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
 	"os"
 	"testing"
@@ -16,8 +17,14 @@ var (
 )
 
 func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		//todo fix later
+		//log.Fatal("Error loading .env file - %w", err)
+	}
+
 	dbURI = os.Getenv("DATABASE_URI")
-	dbName = os.Getenv("DB_NAME")
+	dbName = os.Getenv("POSTGRES_DB")
 }
 
 type APITestSuite struct {
@@ -43,12 +50,15 @@ func TestMain(m *testing.M) {
 
 func (s *APITestSuite) SetupSuite() {
 	if dbURI == "" {
-		//s.FailNow("DATABASE_URI is not set")
+		//todo fix later
 		dbURI = "postgres://postgres123:postgres123@localhost:5432/postgres123?sslmode=disable"
+		//s.FailNow("DATABASE_URI is not set")
 	}
+
 	if dbName == "" {
+		//todo fix later
 		dbName = "postgres123"
-		//s.FailNow("DB_NAME is not set")
+		//s.FailNow("POSTGRES_DB is not set")
 	}
 
 	conn, err := pgx.Connect(context.Background(), dbURI)
