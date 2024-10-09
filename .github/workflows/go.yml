@@ -65,6 +65,6 @@ jobs:
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
       - name: Wait for Postgres to be ready
         run: until pg_isready -h localhost -p 5432 -U "${{ secrets.POSTGRES_USER }}"; do sleep 1; done
-         - name: Run Integration Tests
-         run: make test.integration
+      - name: Run Integration Tests
+        run: make test.integration
 
