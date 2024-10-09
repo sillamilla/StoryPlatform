@@ -43,10 +43,12 @@ func TestMain(m *testing.M) {
 
 func (s *APITestSuite) SetupSuite() {
 	if dbURI == "" {
-		s.FailNow("DATABASE_URI is not set")
+		//s.FailNow("DATABASE_URI is not set")
+		dbURI = "postgres://postgres123:postgres123@localhost:5432/postgres123?sslmode=disable"
 	}
 	if dbName == "" {
-		s.FailNow("DB_NAME is not set")
+		dbName = "postgres123"
+		//s.FailNow("DB_NAME is not set")
 	}
 
 	conn, err := pgx.Connect(context.Background(), dbURI)
